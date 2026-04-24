@@ -1,8 +1,5 @@
-.pio
 .vscode
-.DS_Store
+build
 sdkconfig
 sdkconfig.old
-*.log
-managed_components/
 dependencies.lock
