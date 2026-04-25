@@ -324,7 +324,7 @@
 
         function updatePowerButtonUI() {
             const btn = document.getElementById('btnPower');
-            btn.innerText = isPowerOn ? 'SYSTEM ACTIVE' : 'SYSTEM STANDBY';
+            btn.innerText = isPowerOn ? 'POWER ON' : 'POWER OFF';
             btn.classList.toggle('off', !isPowerOn);
             btn.style.boxShadow = isPowerOn ? '0 0 20px rgba(0, 255, 136, 0.2)' : 'none';
         }
