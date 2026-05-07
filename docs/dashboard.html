@@ -261,7 +261,7 @@
 
         <div class="setting-group">
             <label class="setting-label">Project Secret Key</label>
-            <input type="text" id="inputKey" class="setting-input" placeholder="0x00" onchange="saveKey(this.value)">
+            <input type="text" id="inputKey" class="setting-input" placeholder="0xAC" onchange="saveKey(this.value)">
         </div>
 
         <div class="setting-group">
@@ -339,7 +339,7 @@
 
         let device, server, service, charData, charCtrl;
         let isPowerOn = false;
-        let PROJECT_KEY = localStorage.getItem('nexus_key') || '0x00';
+        let PROJECT_KEY = localStorage.getItem('nexus_key') || '0xAC';
         let clickCount = 0, clickTimer = null;
 
         const SVC_UUID  = '0000ff01-0000-1000-8000-00805f9b34fb';
