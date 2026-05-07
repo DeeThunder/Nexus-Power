@@ -3,538 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Nexus Power | Dashboard</title>
+    <title>Nexus Power — Smart Power Bank by Deethunder</title>
+    <meta name="description" content="Nexus Power is an intelligent smart power bank with real-time BLE monitoring, a PWA dashboard, and hardware authentication. Built by Deethunder.">
 
-    <!-- PWA Manifest -->
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-
-    <!-- iOS PWA Support -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Nexus Power">
-    <link rel="apple-touch-icon" href="icon-512.png">
-
-    <!-- Android / General -->
     <meta name="theme-color" content="#00ff88">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="description" content="Smart Power Bank Controller by Deethunder Nexus">
+    <link rel="icon" type="image/png" href="assets/images/icon-512.png">
+    <meta name="apple-mobile-web-app-title" content="Nexus Power">
+    <link rel="apple-touch-icon" href="assets/images/icon-512.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;600;800&family=DM+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #060708;
-            --card: #0c0f12;
-            --accent: #00ff88;
-            --text: #f1f5f9;
-            --text-dim: #94a3b8;
-            --border: rgba(255,255,255,0.08);
-            --danger: #ef4444;
-        }
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Manrope', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
-        }
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="assets/css/tailwind.css">
 
-        .phone-mockup {
-            width: 100%;
-            max-width: 400px;
-            background: var(--card);
-            border-radius: 40px;
-            border: 2px solid var(--border);
-            padding: 30px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            position: relative;
-            z-index: 1;
-        }
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
-        header { margin-bottom: 40px; }
-        .eyebrow { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; cursor: default; }
-        .title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; letter-spacing: 1px; }
-        
-        .battery-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .pct { font-family: 'Bebas Neue', sans-serif; font-size: 80px; line-height: 1; }
-        .pct-unit { font-size: 30px; color: var(--accent); }
-
-        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 30px; }
-        .metric-item { background: rgba(255,255,255,0.02); padding: 15px 5px; border-radius: 12px; border: 1px solid var(--border); }
-        .m-val { font-family: 'DM Mono', monospace; font-size: 14px; display: block; margin-bottom: 2px; }
-        .m-lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-
-        .btn-toggle {
-            width: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            font-family: 'Manrope', sans-serif;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-toggle:not(.off) {
-            animation: pulse-glow 2s infinite;
-        }
-        .btn-toggle.off { background: #1f262d; color: var(--text-dim); }
-        .btn-toggle:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
-        }
-
-        .charging-badge {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 12px;
-            padding: 8px 16px;
-            background: rgba(0, 255, 136, 0.08);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: var(--accent);
-            text-transform: uppercase;
-            animation: charging-pulse 1.5s infinite;
-        }
-        .charging-badge.visible { display: flex; }
-        @keyframes charging-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .btn-connect { margin-top: 20px; background: transparent; border: 1px solid var(--accent); color: var(--accent); width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 600; text-transform: uppercase; transition: 0.2s; }
-        .btn-connect:hover { background: var(--accent); color: #000; }
-
-        /* Sidebar Settings */
-        .sidebar {
-            position: fixed;
-            right: -100%;
-            top: 0;
-            width: 320px;
-            height: 100%;
-            background: #0c0f12;
-            border-left: 1px solid var(--border);
-            z-index: 100;
-            padding: 40px 30px;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -20px 0 40px rgba(0,0,0,0.5);
-        }
-        .sidebar.active { right: 0; }
-        .sidebar-header { margin-bottom: 40px; }
-        .sidebar-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; margin-bottom: 5px; }
-        .sidebar-subtitle { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-        
-        .setting-group { margin-bottom: 30px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid var(--border); }
-        .setting-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-        .setting-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; }
-
-        .dev-badge { font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px; border-radius: 8px; margin-top: 10px; display: block; text-align: center; }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); opacity: 0; visibility: hidden; transition: 0.3s; z-index: 90; backdrop-filter: blur(5px); }
-        .overlay.active { opacity: 1; visibility: visible; }
-
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--danger); margin-right: 5px; }
-        .status-dot.online { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-        /* PWA Install Banners */
-        .install-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 360px;
-            background: #0c0f12;
-            border: 1px solid rgba(0,255,136,0.3);
-            border-radius: 20px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            z-index: 200;
-            animation: slide-up 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        .install-banner.hidden { display: none; }
-        .install-banner img { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; }
-        .install-banner-text { flex: 1; }
-        .install-banner-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
-        .install-banner-text span { font-size: 10px; color: var(--text-dim); }
-        .install-banner-actions { display: flex; flex-direction: column; gap: 6px; }
-        .btn-install { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; }
-        .btn-dismiss { background: transparent; color: var(--text-dim); border: none; font-size: 10px; cursor: pointer; text-align: center; }
-        @keyframes slide-up {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        /* iOS hint toast */
-        .ios-hint {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 360px;
-            background: #0c0f12;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 14px 18px;
-            font-size: 11px;
-            color: var(--text-dim);
-            text-align: center;
-            line-height: 1.6;
-            z-index: 200;
-            animation: slide-up 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        .ios-hint.hidden { display: none; }
-        .ios-hint strong { color: var(--text); }
-    </style>
+    <!-- External custom styles -->
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body class="text-white overflow-x-hidden">
 
-    <!-- Android: Install as PWA banner -->
-    <div class="install-banner hidden" id="install-banner">
-        <img src="icon-512.png" alt="Nexus Power icon">
-        <div class="install-banner-text">
-            <strong>Install Nexus Power</strong>
-            <span>Add to home screen for the best experience</span>
-        </div>
-        <div class="install-banner-actions">
-            <button class="btn-install" id="btn-install">Install</button>
-            <button class="btn-dismiss" id="btn-dismiss">Not now</button>
-        </div>
-    </div>
+<!-- ═══ NAVBAR ════════════════════════════════════════════════════════════ -->
+<nav class="nav-glass fixed top-0 left-0 right-0 z-50 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-    <!-- iOS: Bluefy browser hint -->
-    <div class="ios-hint hidden" id="ios-hint">
-        <strong>📱 iPhone / iPad Detected</strong><br><br>
-        Safari doesn't support Bluetooth. To control your Nexus Power device, open this page in <strong style="color:var(--accent);">Bluefy</strong> — a free browser with full Bluetooth support.
-        <br><br>
-        <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055"
-           target="_blank"
-           style="display:inline-block; background:var(--accent); color:#000; font-weight:800; font-size:11px; padding:10px 20px; border-radius:10px; text-decoration:none; margin-bottom:10px;">
-            Download Bluefy — Free on App Store
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center">
+                <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
+            </div>
+            <span class="font-display text-xl tracking-widest">NEXUS POWER</span>
         </a>
-        <br>
-        <button class="btn-dismiss" id="ios-dismiss" style="color:var(--text-dim); font-size:10px; margin-top:4px;">Dismiss</button>
+
+        <!-- Desktop nav links -->
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#about"  class="text-sm text-white/50 hover:text-white transition-colors font-medium">About</a>
+            <a href="#how"    class="text-sm text-white/50 hover:text-white transition-colors font-medium">How it Works</a>
+            <a href="#compat" class="text-sm text-white/50 hover:text-white transition-colors font-medium">Compatibility</a>
+        </div>
+
+        <!-- CTA -->
+        <a href="dashboard.html"
+           class="btn-shimmer bg-accent text-dark font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-accent/90 transition-all flex items-center gap-2">
+            <i data-lucide="bluetooth" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Connect to Device</span>
+            <span class="sm:hidden">Connect</span>
+        </a>
     </div>
+</nav>
 
-    <div class="phone-mockup">
-        <header id="header-logo" onclick="handleLogoClick()">
-            <div class="eyebrow">Powered by Deethunder Nexus</div>
-            <div class="title">NEXUS POWER</div>
-        </header>
+<!-- ═══ HERO ══════════════════════════════════════════════════════════════ -->
+<section class="relative min-h-screen flex items-center pt-20 grid-bg hero-glow overflow-hidden">
+    <!-- Background orbs -->
+    <div class="absolute top-1/3 left-1/4  w-72 h-72 bg-accent/5  rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/3 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div id="status-container" style="font-size: 11px; margin-bottom: 20px;">
-            <span class="status-dot" id="dot"></span> 
-            <span id="status-text" style="color: var(--text-dim)">OFFLINE</span>
-        </div>
+    <div class="max-w-7xl mx-auto px-6 py-24 w-full">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
 
-        <div class="battery-card">
-            <div class="pct" id="pct">--<span class="pct-unit">%</span></div>
-            <div class="charging-badge" id="charging-badge">⚡ Charging</div>
-            <div id="alert-banner" style="display: none; background: rgba(239, 68, 68, 0.2); color: var(--danger); font-size: 10px; padding: 10px; border-radius: 10px; margin-top: 15px; font-weight: 800; border: 1px solid var(--danger); text-transform: uppercase; letter-spacing: 1px;">
-                ⚠️ CRITICAL BATTERY: OUTPUT DISABLED
-            </div>
-            <div class="metrics" style="grid-template-columns: 1fr;">
-                <div class="metric-item"><span class="m-val" id="watts">-- W</span><span class="m-lbl">Power Output</span></div>
-            </div>
-        </div>
-
-        <button class="btn-toggle off" id="btnPower" disabled>POWER OFF</button>
-        <button class="btn-connect" id="btnConnect">Connect to Device</button>
-    </div>
-
-    <!-- Developer Settings Sidebar -->
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">Developer Options</div>
-            <div class="sidebar-subtitle">Hardware Verification</div>
-        </div>
-        
-        <div class="setting-group">
-            <label class="setting-label">Project Secret Key</label>
-            <input type="text" id="inputKey" class="setting-input" placeholder="0x00" onchange="saveKey(this.value)">
-        </div>
-
-        <div class="setting-group">
-            <label class="setting-label">Unit Status</label>
-            <div id="dev-serial" class="dev-badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">SN: --------</div>
-            <div id="dev-status" class="dev-badge" style="margin-top: 5px;">NOT INITIALIZED</div>
-        </div>
-
-        <div class="setting-group">
-            <label class="setting-label">Raw Readings</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                <div class="dev-badge" style="background: rgba(255,255,255,0.03); color: var(--text-dim);">
-                    <span style="font-size:9px; display:block; margin-bottom:3px; letter-spacing:1px;">VOLTAGE</span>
-                    <span id="volts" style="font-size:14px; color: var(--text);">-- V</span>
+            <!-- Text -->
+            <div class="fade-up">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 rounded-full px-4 py-1.5 mb-8">
+                    <span class="w-2 h-2 rounded-full bg-accent pulse-dot"></span>
+                    <span class="text-accent text-xs font-mono tracking-widest">DEETHUNDER NEXUS</span>
                 </div>
-                <div class="dev-badge" style="background: rgba(255,255,255,0.03); color: var(--text-dim);">
-                    <span style="font-size:9px; display:block; margin-bottom:3px; letter-spacing:1px;">CURRENT</span>
-                    <span id="amps" style="font-size:14px; color: var(--text);">-- A</span>
+
+                <h1 class="font-display text-7xl lg:text-8xl leading-none mb-6">
+                    SMART<br>
+                    <span class="stat-glow">POWER</span><br>
+                    BANK
+                </h1>
+
+                <p class="text-white/50 text-lg leading-relaxed mb-10 max-w-lg">
+                    An intelligent power bank with real-time wireless monitoring,
+                    a progressive web dashboard, and hardware-level authentication.
+                    Built for makers, designed for everyone.
+                </p>
+
+                <!-- Stats -->
+                <div class="flex flex-wrap gap-8 mb-10">
+                    <div>
+                        <div class="font-display text-3xl stat-glow">DUAL</div>
+                        <div class="text-white/40 text-xs mt-1 tracking-wider font-mono">USB & ROUTER CHARGING</div>
+                    </div>
+                    <div class="w-px bg-white/10 hidden sm:block"></div>
+                    <div>
+                        <div class="font-display text-3xl stat-glow">BLE</div>
+                        <div class="text-white/40 text-xs mt-1 tracking-wider font-mono">WIRELESS CONTROL</div>
+                    </div>
+                    <div class="w-px bg-white/10 hidden sm:block"></div>
+                    <div>
+                        <div class="font-display text-3xl stat-glow">PWA</div>
+                        <div class="text-white/40 text-xs mt-1 tracking-wider font-mono">INSTALL ON ANY PHONE</div>
+                    </div>
+                </div>
+
+                <!-- CTAs -->
+                <div class="flex flex-wrap gap-4">
+                    <a href="dashboard.html"
+                       class="btn-shimmer bg-accent text-dark font-bold px-8 py-4 rounded-2xl hover:bg-accent/90 transition-all flex items-center gap-3 text-sm">
+                        <i data-lucide="bluetooth" class="w-4 h-4"></i> Connect to Device
+                    </a>
+                    <a href="#about"
+                       class="bg-white/5 border border-white/10 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-all text-sm flex items-center gap-2">
+                        Learn More <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero image -->
+            <div class="flex justify-center lg:justify-end">
+                <div class="float relative">
+                    <div class="absolute inset-0 bg-accent/15 blur-3xl rounded-full scale-75"></div>
+                    <img src="assets/images/hero.png" alt="Nexus Power Bank"
+                         class="relative w-full max-w-sm rounded-3xl shadow-2xl"
+                         onerror="this.parentElement.innerHTML='<div class=\'relative w-72 h-72 rounded-3xl border border-accent/20 bg-card flex flex-col items-center justify-center gap-4\'><div class=\'text-7xl\'>⚡</div><div class=\'font-display text-2xl text-accent\'>NEXUS POWER</div></div>'">
                 </div>
             </div>
         </div>
-
-        <button class="btn-connect" onclick="toggleSidebar()" style="border-color: var(--text-dim); color: var(--text-dim);">Close Settings</button>
     </div>
 
-    <script>
-        let device, server, service, charData, charCtrl;
-        let isPowerOn = false;
-        let PROJECT_KEY = localStorage.getItem('nexus_key') || '0x00';
-        let clickCount = 0;
-        let clickTimer = null;
+    <!-- Scroll hint -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20">
+        <span class="text-xs font-mono tracking-widest">SCROLL</span>
+        <div class="w-px h-8 bg-gradient-to-b from-white/20 to-transparent"></div>
+    </div>
+</section>
 
-        const SVC_UUID = '0000ff01-0000-1000-8000-00805f9b34fb';
-        const CHR_DATA = '0000ff02-0000-1000-8000-00805f9b34fb';
-        const CHR_CTRL = '0000ff03-0000-1000-8000-00805f9b34fb';
+<div class="sep"></div>
 
-        document.getElementById('inputKey').value = PROJECT_KEY;
+<!-- ═══ FEATURES ══════════════════════════════════════════════════════════ -->
+<section id="about" class="py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-20">
+            <div class="text-accent text-xs font-mono tracking-widest mb-4">WHAT IS NEXUS POWER</div>
+            <h2 class="font-display text-5xl lg:text-6xl mb-6">BUILT FOR PRECISION</h2>
+            <p class="text-white/40 max-w-xl mx-auto leading-relaxed">
+                Nexus Power fuses embedded engineering with modern web technology
+                to give you full visibility and control over your power bank.
+            </p>
+        </div>
 
-        function handleLogoClick() {
-            clickCount++;
-            clearTimeout(clickTimer);
-            if (clickCount === 5) {
-                toggleSidebar();
-                clickCount = 0;
-            } else {
-                clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
-            }
-        }
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-        }
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="radio"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Real-Time BLE Monitoring</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Live battery percentage, power draw, and charging state streamed wirelessly at one-second intervals directly to your phone.</p>
+            </div>
 
-        function saveKey(val) {
-            PROJECT_KEY = val;
-            localStorage.setItem('nexus_key', val);
-        }
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="battery-charging"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Accurate Battery Tracking</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Non-linear discharge curve with interpolation gives you a precise percentage reading across the full battery range — no more misleading numbers.</p>
+            </div>
 
-        let authorizedSerials = [];
-        fetch('devices.json')
-            .then(r => r.json())
-            .then(data => authorizedSerials = data.authorized_serials)
-            .catch(e => console.log("Registry Error"));
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="shield-check"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Cell Protection</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Automatic output cutoff at 0% prevents deep discharge and permanent cell damage, so your battery lasts longer over time.</p>
+            </div>
 
-        async function connect() {
-            try {
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ name: 'Nexus Power' }, { services: [SVC_UUID] }],
-                    optionalServices: [SVC_UUID]
-                });
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="smartphone"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Progressive Web App</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Install the dashboard on your Android or iPhone home screen. Works offline and loads instantly — no App Store required.</p>
+            </div>
 
-                device.addEventListener('gattserverdisconnected', onDisconnected);
-                server = await device.gatt.connect();
-                service = await server.getPrimaryService(SVC_UUID);
-                charData = await service.getCharacteristic(CHR_DATA);
-                charCtrl = await service.getCharacteristic(CHR_CTRL);
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="key-round"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Hardware Authentication</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Each unit carries a unique cryptographic identity. Unregistered or counterfeit hardware is detected and locked out automatically.</p>
+            </div>
 
-                updateUIStatus(true);
-                await charData.startNotifications();
-                charData.addEventListener('characteristicvaluechanged', handleData);
-            } catch (err) {
-                console.error(err);
-            }
-        }
+            <div class="glass-card rounded-2xl p-8 cursor-default">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 text-accent icon-md">
+                    <i data-lucide="power"></i>
+                </div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">Remote Output Control</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Toggle power output on or off from the dashboard with a single tap. State is preserved and restored automatically after every reboot.</p>
+            </div>
 
-        function onDisconnected() { updateUIStatus(false); }
+        </div>
+    </div>
+</section>
 
-        function updateUIStatus(connected) {
-            document.getElementById('status-text').innerText = connected ? 'CONNECTED' : 'OFFLINE';
-            document.getElementById('dot').className = connected ? 'status-dot online' : 'status-dot';
-            document.getElementById('btnPower').disabled = !connected;
-            document.getElementById('btnConnect').style.display = connected ? 'none' : 'block';
-            if(!connected) {
-                document.getElementById('dev-serial').innerText = 'SN: --------';
-                document.getElementById('dev-status').innerText = 'NOT INITIALIZED';
-                document.getElementById('dev-status').style.background = 'transparent';
-                document.getElementById('volts').innerText = '-- V';
-                document.getElementById('amps').innerText = '-- A';
-                document.getElementById('watts').innerText = '-- W';
-                document.getElementById('pct').innerHTML = '--<span class="pct-unit">%</span>';
-            }
-        }
+<div class="sep"></div>
 
-        function handleData(event) {
-            const view = event.target.value;
-            const v = view.getFloat32(0, true).toFixed(2);
-            const i = (view.getFloat32(4, true) / 1000).toFixed(2);
-            const p = (view.getFloat32(8, true) / 1000).toFixed(2);
-            const pct = view.getUint8(12);
-            
-            const m1 = view.getUint8(13);
-            const m2 = view.getUint8(14);
-            const m3 = view.getUint8(15);
-            const sig = view.getUint8(16);
-            const SECRET = parseInt(PROJECT_KEY, 16);
+<!-- ═══ HOW IT WORKS ══════════════════════════════════════════════════════ -->
+<section id="how" class="py-32 px-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-20">
+            <div class="text-accent text-xs font-mono tracking-widest mb-4">HOW IT WORKS</div>
+            <h2 class="font-display text-5xl lg:text-6xl mb-6">THREE STEPS</h2>
+        </div>
 
-            const isValid = ((m1 + m2 + m3) & 0xFF) ^ SECRET;
-            
-            if (sig === isValid) {
-                const snRaw = `NX-${m1.toString(16).padStart(2,'0')}${m2.toString(16).padStart(2,'0')}${m3.toString(16).padStart(2,'0')}`.toUpperCase();
-                document.getElementById('dev-serial').innerText = `SN: ${snRaw}`;
-                
-                if (authorizedSerials.includes(snRaw)) {
-                    document.getElementById('dev-status').innerText = "REGISTERED ASSET";
-                    document.getElementById('dev-status').style.background = "rgba(0, 255, 136, 0.1)";
-                    document.getElementById('dev-status').style.color = "var(--accent)";
-                    
-                    // Sync Power State with Hardware
-                    const hwPowerOn = view.getUint8(17) === 1;
-                    if (isPowerOn !== hwPowerOn) {
-                        isPowerOn = hwPowerOn;
-                        updatePowerButtonUI();
-                    }
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-6 text-accent icon-lg">
+                    <i data-lucide="plug-zap"></i>
+                </div>
+                <div class="font-display text-4xl stat-glow mb-3">01</div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">POWER UP</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Turn on the Nexus Power device. It boots instantly, restores the last power state, and begins wireless advertising.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-6 text-accent icon-lg">
+                    <i data-lucide="bluetooth"></i>
+                </div>
+                <div class="font-display text-4xl stat-glow mb-3">02</div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">CONNECT</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Open the dashboard and tap Connect. Your phone pairs wirelessly — hardware identity is verified in the background.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-6 text-accent icon-lg">
+                    <i data-lucide="activity"></i>
+                </div>
+                <div class="font-display text-4xl stat-glow mb-3">03</div>
+                <h3 class="font-display text-xl mb-3 tracking-wide">MONITOR</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Live battery level, power draw, and charging state update every second. Toggle the output with a single tap.</p>
+            </div>
+        </div>
 
-                    // Check System Status (Byte 18)
-                    const status = view.getUint8(18);
-                    const alertBanner = document.getElementById('alert-banner');
-                    if (status === 1) {
-                        alertBanner.style.display = 'block';
-                    } else {
-                        alertBanner.style.display = 'none';
-                    }
+        <div class="text-center mt-20">
+            <a href="dashboard.html"
+               class="btn-shimmer inline-flex items-center gap-3 bg-accent text-dark font-bold px-10 py-5 rounded-2xl hover:bg-accent/90 transition-all text-base">
+                <i data-lucide="bluetooth" class="w-5 h-5"></i> Open Dashboard
+            </a>
+        </div>
+    </div>
+</section>
 
-                    // Charging Detection (Byte 19)
-                    const isCharging = view.byteLength > 19 && view.getUint8(19) === 1;
-                    document.getElementById('charging-badge').classList.toggle('visible', isCharging);
-                } else {
-                    // FORCE KILL: Turn off power before disconnecting
-                    charCtrl.writeValue(new Uint8Array([0])).then(() => {
-                        device.gatt.disconnect();
-                        alert("ACCESS DENIED: Hardware not registered. Power output disabled.");
-                    });
-                }
-            } else {
-                // FORCE KILL: Invalid signature detected
-                charCtrl.writeValue(new Uint8Array([0])).then(() => {
-                    device.gatt.disconnect();
-                    alert("SECURITY ALERT: Counterfeit hardware detected. Device locked.");
-                });
-            }
+<div class="sep"></div>
 
-            document.getElementById('volts').innerText = v + ' V';
-            document.getElementById('amps').innerText = i + ' A';
-            document.getElementById('watts').innerText = p + ' W';
-            document.getElementById('pct').innerHTML = pct + '<span class="pct-unit">%</span>';
-            
-            // Color coding for battery safety
-            const pctEl = document.getElementById('pct');
-            if (pct < 20) pctEl.style.color = 'var(--danger)';
-            else if (pct < 50) pctEl.style.color = '#f59e0b'; // Amber
-            else pctEl.style.color = 'var(--text)';
-        }
+<!-- ═══ COMPATIBILITY ══════════════════════════════════════════════════════ -->
+<section id="compat" class="py-32 px-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-16">
+            <div class="text-accent text-xs font-mono tracking-widest mb-4">COMPATIBILITY</div>
+            <h2 class="font-display text-5xl mb-6">WORKS ON YOUR DEVICE</h2>
+        </div>
 
-        function updatePowerButtonUI() {
-            const btn = document.getElementById('btnPower');
-            btn.innerText = isPowerOn ? 'POWER ON' : 'POWER OFF';
-            btn.classList.toggle('off', !isPowerOn);
-            btn.style.boxShadow = isPowerOn ? '0 0 20px rgba(0, 255, 136, 0.2)' : 'none';
-        }
+        <div class="grid md:grid-cols-3 gap-5">
+            <div class="glass-card rounded-2xl p-8 text-center cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-5 text-accent icon-lg">
+                    <i data-lucide="smartphone"></i>
+                </div>
+                <h3 class="font-display text-xl mb-2 tracking-wide">Android</h3>
+                <div class="text-accent text-xs font-mono mb-4 tracking-widest">FULL SUPPORT</div>
+                <p class="text-white/40 text-sm leading-relaxed">Chrome on Android supports Web Bluetooth natively. Install as a PWA from your browser for the best experience.</p>
+            </div>
 
-        async function togglePower() {
-            const targetState = !isPowerOn;
-            const val = new Uint8Array([targetState ? 1 : 0]);
-            try {
-                await charCtrl.writeValue(val);
-                // We'll let the next notification sync the UI for "truth"
-                // but for snappy feel, we can update locally too
-                isPowerOn = targetState;
-                updatePowerButtonUI();
-            } catch (e) {
-                console.error("Failed to toggle power", e);
-            }
-        }
+            <div class="glass-card rounded-2xl p-8 text-center cursor-default border border-accent/10">
+                <div class="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-5 text-accent icon-lg">
+                    <i data-lucide="tablet-smartphone"></i>
+                </div>
+                <h3 class="font-display text-xl mb-2 tracking-wide">iPhone / iPad</h3>
+                <div class="text-yellow-400 text-xs font-mono mb-4 tracking-widest">VIA BLUEFY APP</div>
+                <p class="text-white/40 text-sm leading-relaxed">Safari blocks Web Bluetooth. Install the free <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" class="text-accent underline">Bluefy</a> browser from the App Store and open the dashboard there.</p>
+            </div>
 
-        document.getElementById('btnConnect').onclick = connect;
-        document.getElementById('btnPower').onclick = togglePower;
+            <div class="glass-card rounded-2xl p-8 text-center cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-5 text-accent icon-lg">
+                    <i data-lucide="tablet"></i>
+                </div>
+                <h3 class="font-display text-xl mb-2 tracking-wide">Android Tablet</h3>
+                <div class="text-accent text-xs font-mono mb-4 tracking-widest">FULL SUPPORT</div>
+                <p class="text-white/40 text-sm leading-relaxed">Chrome on Android tablets works perfectly. The dashboard is responsive and adapts cleanly to larger screens.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        // ── PWA: Service Worker Registration ──────────────────────────
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => {
-                    console.warn('SW registration failed:', err);
-                });
-            });
-        }
+<div class="sep"></div>
 
-        // ── PWA: Android Install Prompt ───────────────────────────────
-        let deferredPrompt = null;
-        const installBanner = document.getElementById('install-banner');
-        const btnInstall    = document.getElementById('btn-install');
-        const btnDismiss    = document.getElementById('btn-dismiss');
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════════ -->
+<footer class="py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Only show if user hasn't dismissed before
-            if (!sessionStorage.getItem('pwa-dismissed')) {
-                installBanner.classList.remove('hidden');
-            }
-        });
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <div class="font-display text-lg tracking-widest">NEXUS POWER</div>
+                    <div class="text-white/30 text-xs font-mono">by Deethunder</div>
+                </div>
+            </div>
 
-        btnInstall.addEventListener('click', async () => {
-            installBanner.classList.add('hidden');
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            }
-        });
+            <div class="flex items-center gap-6 text-sm text-white/40">
+                <a href="#about"  class="hover:text-white transition-colors">About</a>
+                <a href="#how"    class="hover:text-white transition-colors">How it Works</a>
+                <a href="#compat" class="hover:text-white transition-colors">Compatibility</a>
+                <a href="https://github.com/DeeThunder/Smart-Power-bank" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub
+                </a>
+            </div>
 
-        btnDismiss.addEventListener('click', () => {
-            installBanner.classList.add('hidden');
-            sessionStorage.setItem('pwa-dismissed', '1');
-        });
+            <a href="dashboard.html"
+               class="btn-shimmer bg-accent text-dark font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-accent/90 transition-all flex items-center gap-2">
+                <i data-lucide="bluetooth" class="w-4 h-4"></i> Open Dashboard
+            </a>
+        </div>
+        <div class="text-center text-white/20 text-xs font-mono mt-10">
+            © 2025 Deethunder Nexus.
+        </div>
+    </div>
+</footer>
 
-        // ── PWA: iOS "Add to Home Screen" hint ────────────────────────
-        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-        const isStandalone = ('standalone' in navigator) && navigator.standalone;
-        const iosHint = document.getElementById('ios-hint');
+<script>
+    // Initialise all Lucide icons on the page
+    lucide.createIcons();
+</script>
 
-        if (isIos && !isStandalone && !sessionStorage.getItem('ios-hint-dismissed')) {
-            // Delay slightly so it doesn't pop up immediately
-            setTimeout(() => iosHint.classList.remove('hidden'), 2000);
-        }
-
-        document.getElementById('ios-dismiss').addEventListener('click', () => {
-            iosHint.classList.add('hidden');
-            sessionStorage.setItem('ios-hint-dismissed', '1');
-        });
-
-    </script>
 </body>
 </html>

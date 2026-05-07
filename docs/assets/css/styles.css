@@ -1,0 +1,92 @@
+/* ── Nexus Power — Landing Page Custom Styles ─────────────────────────── */
+/* Tailwind handles layout/spacing/typography. This file handles effects,   */
+/* animations, and anything Tailwind can't express cleanly.                 */
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Manrope', sans-serif; background: #060708; }
+
+/* Animated grid background */
+.grid-bg {
+    background-image:
+        linear-gradient(rgba(0,255,136,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+
+/* Hero radial glow */
+.hero-glow {
+    background: radial-gradient(ellipse 80% 50% at 50% -10%,
+        rgba(0,255,136,.13) 0%, transparent 60%);
+}
+
+/* Gradient text (stats, accented headings) */
+.stat-glow {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Glassmorphism card */
+.glass-card {
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.06);
+    transition: background .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+.glass-card:hover {
+    background: rgba(255,255,255,.04);
+    border-color: rgba(0,255,136,.2);
+    transform: translateY(-5px);
+    box-shadow: 0 24px 48px rgba(0,0,0,.5);
+}
+
+/* Navbar glassmorphism */
+.nav-glass {
+    background: rgba(6,7,8,.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Horizontal section separator */
+.sep {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.06), transparent);
+}
+
+/* Button shimmer sweep on hover */
+.btn-shimmer { position: relative; overflow: hidden; }
+.btn-shimmer::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+    transition: left .5s;
+}
+.btn-shimmer:hover::after { left: 100%; }
+
+/* ── Animations ────────────────────────────────────────────────────────── */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-14px); }
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .4; }
+}
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.float     { animation: float    4s ease-in-out infinite; }
+.pulse-dot { animation: pulse-dot 2s infinite; }
+.fade-up   { animation: fade-up   .8s ease forwards; }
+
+/* ── Custom scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #060708; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,136,.3); border-radius: 2px; }
+
+/* ── Lucide icon sizing helpers ────────────────────────────────────────── */
+.icon-md svg { width: 24px; height: 24px; }
+.icon-lg svg { width: 32px; height: 32px; }

@@ -1,10 +1,14 @@
-const CACHE_NAME = 'nexus-power-v1';
+const CACHE_NAME = 'nexus-power-v3';
 const ASSETS = [
   './',
   './index.html',
+  './dashboard.html',
   './manifest.json',
-  './icon-512.png',
-  './devices.json'
+  './devices.json',
+  './assets/css/styles.css',
+  './assets/images/icon-512.png',
+  './assets/images/hero.png',
+  './assets/images/hardware.png'
 ];
 
 // Install: cache all shell assets
