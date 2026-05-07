@@ -48,13 +48,13 @@ void NexusBLE::setToggleCallback(ToggleCallback cb) {
 
 // Security logic uses NEXUS_SECRET_BYTE from secrets.hpp
 
-void NexusBLE::updatePowerData(float voltage, float current, float power, uint8_t batteryPct, bool isPowerOn, uint8_t statusCode) {
+void NexusBLE::updatePowerData(float voltage, float current, float power, uint8_t batteryPct, bool isPowerOn, uint8_t statusCode, bool isCharging) {
     if (m_pServer->getConnectedCount() == 0) return;
 
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_BT);
 
-    uint8_t packet[19]; // Expanded for state, status, and signature
+    uint8_t packet[20]; // Byte 19: isCharging flag
     memcpy(packet, &voltage, 4);
     memcpy(packet + 4, &current, 4);
     memcpy(packet + 8, &power, 4);
@@ -62,14 +62,15 @@ void NexusBLE::updatePowerData(float voltage, float current, float power, uint8_
     packet[13] = mac[3];
     packet[14] = mac[4];
     packet[15] = mac[5];
-    
+
     // Generate Security Signature: (MAC bytes sum) XOR Secret Key
     packet[16] = (mac[3] + mac[4] + mac[5]) ^ NEXUS_SECRET_BYTE;
-    
+
     packet[17] = isPowerOn ? 1 : 0;
     packet[18] = statusCode;
+    packet[19] = isCharging ? 1 : 0;
 
-    m_pDataChar->setValue(packet, 19);
+    m_pDataChar->setValue(packet, 20);
     m_pDataChar->notify();
 }
 
