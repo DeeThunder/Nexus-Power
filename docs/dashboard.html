@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Nexus Power | Dashboard</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/images/icon-512.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Nexus Power">
+    <link rel="apple-touch-icon" href="assets/images/icon-512.png">
+    <meta name="theme-color" content="#00ff88">
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;600;800&family=DM+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060708;
+            --card: #0c0f12;
+            --accent: #00ff88;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Top navbar ── */
+        .dash-nav {
+            background: rgba(6,7,8,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .dash-nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; }
+        .btn-back {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: var(--text); }
+
+        /* ── Main content ── */
+        .dash-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px 60px;
+        }
+
+        .phone-mockup {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card);
+            border-radius: 40px;
+            border: 2px solid var(--border);
+            padding: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        header { margin-bottom: 40px; }
+        .eyebrow { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; cursor: default; }
+        .title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; letter-spacing: 1px; }
+
+        .battery-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .pct { font-family: 'Bebas Neue', sans-serif; font-size: 80px; line-height: 1; }
+        .pct-unit { font-size: 30px; color: var(--accent); }
+
+        .metrics { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 30px; }
+        .metric-item { background: rgba(255,255,255,0.02); padding: 15px 5px; border-radius: 12px; border: 1px solid var(--border); }
+        .m-val { font-family: 'DM Mono', monospace; font-size: 14px; display: block; margin-bottom: 2px; }
+        .m-lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-toggle {
+            width: 100%;
+            padding: 20px;
+            border-radius: 20px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-toggle:not(.off) { animation: pulse-glow 2s infinite; }
+        .btn-toggle.off { background: #1f262d; color: var(--text-dim); }
+        .btn-toggle:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        @keyframes pulse-glow {
+            0%   { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+            70%  { box-shadow: 0 0 0 15px rgba(0,255,136,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+        }
+
+        .btn-connect { margin-top: 20px; background: transparent; border: 1px solid var(--accent); color: var(--accent); width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 600; text-transform: uppercase; transition: 0.2s; }
+        .btn-connect:hover { background: var(--accent); color: #000; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed; right: -100%; top: 0; width: 320px; height: 100%;
+            background: #0c0f12; border-left: 1px solid var(--border);
+            z-index: 100; padding: 40px 30px;
+            transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: -20px 0 40px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .sidebar.active { right: 0; }
+        .sidebar-header { margin-bottom: 40px; }
+        .sidebar-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; margin-bottom: 5px; }
+        .sidebar-subtitle { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .setting-group { margin-bottom: 30px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid var(--border); }
+        .setting-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+        .setting-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; }
+        .dev-badge { font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px; border-radius: 8px; margin-top: 10px; display: block; text-align: center; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); opacity: 0; visibility: hidden; transition: 0.3s; z-index: 90; backdrop-filter: blur(5px); }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--danger); margin-right: 5px; }
+        .status-dot.online { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        /* Charging badge */
+        .charging-badge {
+            display: none; align-items: center; justify-content: center; gap: 6px;
+            margin-top: 12px; padding: 8px 16px;
+            background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 2px;
+            color: var(--accent); text-transform: uppercase;
+            animation: charging-pulse 1.5s infinite;
+        }
+        .charging-badge.visible { display: flex; }
+        @keyframes charging-pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+        /* PWA Install Banners */
+        .install-banner {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 40px); max-width: 360px;
+            background: #0c0f12; border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 20px; padding: 16px 20px;
+            display: flex; align-items: center; gap: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 200;
+            animation: slide-up 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .install-banner.hidden { display: none; }
+        .install-banner img { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; }
+        .install-banner-text { flex: 1; }
+        .install-banner-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+        .install-banner-text span { font-size: 10px; color: var(--text-dim); }
+        .install-banner-actions { display: flex; flex-direction: column; gap: 6px; }
+        .btn-install { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+        .btn-dismiss-pwa { background: transparent; color: var(--text-dim); border: none; font-size: 10px; cursor: pointer; }
+
+        .ios-hint {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 40px); max-width: 360px;
+            background: #0c0f12; border: 1px solid var(--border); border-radius: 16px;
+            padding: 14px 18px; font-size: 11px; color: var(--text-dim);
+            text-align: center; line-height: 1.6; z-index: 200;
+            animation: slide-up 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .ios-hint.hidden { display: none; }
+        .ios-hint strong { color: var(--text); }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Dashboard Navbar ── -->
+    <div class="dash-nav">
+        <a href="index.html" class="btn-back">← Back to Home</a>
+        <div class="dash-nav-logo">NEXUS POWER</div>
+        <div style="width:80px"></div>
+    </div>
+
+    <!-- ── Incompatible Device Screen (hidden by default) ── -->
+    <div id="incompatible-screen" style="display:none; position:fixed; inset:0; background:#060708; z-index:999; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:20px;">🔒</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:2px; margin-bottom:12px;">NOT COMPATIBLE</div>
+        <div id="incompat-reason" style="color:#94a3b8; font-size:13px; line-height:1.7; max-width:320px; margin-bottom:30px;"></div>
+        <a href="index.html" style="display:inline-block; background:#00ff88; color:#000; font-weight:800; font-size:12px; padding:14px 28px; border-radius:14px; text-decoration:none; letter-spacing:1px;">← Back to Home</a>
+    </div>
+
+
+    <!-- ── Dashboard Content ── -->
+    <div class="dash-content">
+        <div class="phone-mockup">
+            <header id="header-logo" onclick="handleLogoClick()">
+                <div class="eyebrow">Powered by Deethunder Nexus</div>
+                <div class="title">NEXUS POWER</div>
+            </header>
+
+            <div id="status-container" style="font-size: 11px; margin-bottom: 20px;">
+                <span class="status-dot" id="dot"></span>
+                <span id="status-text" style="color: var(--text-dim)">OFFLINE</span>
+            </div>
+
+            <div class="battery-card">
+                <div class="pct" id="pct">--<span class="pct-unit">%</span></div>
+                <div class="charging-badge" id="charging-badge">⚡ Charging</div>
+                <div id="alert-banner" style="display:none; background:rgba(239,68,68,0.2); color:var(--danger); font-size:10px; padding:10px; border-radius:10px; margin-top:15px; font-weight:800; border:1px solid var(--danger); text-transform:uppercase; letter-spacing:1px;">
+                    ⚠️ CRITICAL BATTERY: OUTPUT DISABLED
+                </div>
+                <div class="metrics">
+                    <div class="metric-item"><span class="m-val" id="watts">-- W</span><span class="m-lbl">Power Output</span></div>
+                </div>
+            </div>
+
+            <button class="btn-toggle off" id="btnPower" disabled>POWER OFF</button>
+            <button class="btn-connect" id="btnConnect">Connect to Device</button>
+        </div>
+    </div>
+
+    <!-- ── Developer Sidebar ── -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Developer Options</div>
+            <div class="sidebar-subtitle">Hardware Verification</div>
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Project Secret Key</label>
+            <input type="text" id="inputKey" class="setting-input" placeholder="0x00" onchange="saveKey(this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Unit Status</label>
+            <div id="dev-serial" class="dev-badge" style="background:rgba(255,255,255,0.05); color:var(--text-dim);">SN: --------</div>
+            <div id="dev-status" class="dev-badge" style="margin-top:5px;">NOT INITIALIZED</div>
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Raw Readings</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                <div class="dev-badge" style="background:rgba(255,255,255,0.03); color:var(--text-dim);">
+                    <span style="font-size:9px; display:block; margin-bottom:3px; letter-spacing:1px;">VOLTAGE</span>
+                    <span id="volts" style="font-size:14px; color:var(--text);">-- V</span>
+                </div>
+                <div class="dev-badge" style="background:rgba(255,255,255,0.03); color:var(--text-dim);">
+                    <span style="font-size:9px; display:block; margin-bottom:3px; letter-spacing:1px;">CURRENT</span>
+                    <span id="amps" style="font-size:14px; color:var(--text);">-- A</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-connect" onclick="toggleSidebar()" style="border-color:var(--text-dim); color:var(--text-dim);">Close Settings</button>
+    </div>
+
+    <!-- ── Android PWA Install Banner ── -->
+    <div class="install-banner hidden" id="install-banner">
+        <img src="assets/images/icon-512.png" alt="Nexus Power icon">
+        <div class="install-banner-text">
+            <strong>Install Nexus Power</strong>
+            <span>Add to home screen for the best experience</span>
+        </div>
+        <div class="install-banner-actions">
+            <button class="btn-install" id="btn-install">Install</button>
+            <button class="btn-dismiss-pwa" id="btn-dismiss">Not now</button>
+        </div>
+    </div>
+
+    <!-- ── iOS Bluefy Hint ── -->
+    <div class="ios-hint hidden" id="ios-hint">
+        <strong>📱 iPhone / iPad Detected</strong><br><br>
+        Safari doesn't support Bluetooth. Open this page in <strong style="color:var(--accent);">Bluefy</strong> — a free browser with full Bluetooth support.
+        <br><br>
+        <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank"
+           style="display:inline-block; background:var(--accent); color:#000; font-weight:800; font-size:11px; padding:10px 20px; border-radius:10px; text-decoration:none; margin-bottom:8px;">
+            Download Bluefy — Free on App Store
+        </a><br>
+        <button onclick="document.getElementById('ios-hint').classList.add('hidden'); sessionStorage.setItem('ios-hint-dismissed','1');"
+                style="background:transparent; color:var(--text-dim); border:none; font-size:10px; cursor:pointer; margin-top:4px;">Dismiss</button>
+    </div>
+
+    <script>
+        // ── Compatibility Guard ────────────────────────────────────────
+        // Three signals required to pass — blocks desktops and touch laptops
+        (function () {
+            const hasTouch      = navigator.maxTouchPoints > 0;
+            const isSmallScreen = window.screen.width <= 1024; // phones & tablets, not laptops
+            const hasBluetooth  = 'bluetooth' in navigator;
+            const block         = document.getElementById('incompatible-screen');
+            const reason        = document.getElementById('incompat-reason');
+
+            const isMobileDevice = hasTouch && isSmallScreen; // true only on real mobile/tablet
+
+            if (!isMobileDevice) {
+                // Desktop or touch laptop (big screen) — hard block
+                reason.innerHTML = 'The Nexus Power dashboard requires a <strong style="color:#f1f5f9">mobile device</strong>.<br><br>Please open this page on your Android phone or tablet, or on iPhone / iPad using the <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" style="color:#00ff88">Bluefy app</a>.';
+                block.style.display = 'flex';
+            } else if (!hasBluetooth) {
+                // Mobile device but no Web Bluetooth (iOS Safari)
+                reason.innerHTML = 'Safari does not support Web Bluetooth.<br><br>Install the free <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" style="color:#00ff88">Bluefy browser</a> from the App Store, then open this page inside Bluefy.';
+                block.style.display = 'flex';
+            }
+            // hasTouch + isSmallScreen + hasBluetooth → Android Chrome or Bluefy → load dashboard
+        })();
+
+        let device, server, service, charData, charCtrl;
+        let isPowerOn = false;
+        let PROJECT_KEY = localStorage.getItem('nexus_key') || '0x00';
+        let clickCount = 0, clickTimer = null;
+
+        const SVC_UUID  = '0000ff01-0000-1000-8000-00805f9b34fb';
+        const CHR_DATA  = '0000ff02-0000-1000-8000-00805f9b34fb';
+        const CHR_CTRL  = '0000ff03-0000-1000-8000-00805f9b34fb';
+
+        document.getElementById('inputKey').value = PROJECT_KEY;
+
+        function handleLogoClick() {
+            clickCount++;
+            clearTimeout(clickTimer);
+            if (clickCount === 5) { toggleSidebar(); clickCount = 0; }
+            else clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function saveKey(val) {
+            PROJECT_KEY = val;
+            localStorage.setItem('nexus_key', val);
+        }
+
+        let authorizedSerials = [];
+        fetch('devices.json')
+            .then(r => r.json())
+            .then(data => authorizedSerials = data.authorized_serials)
+            .catch(() => {});
+
+        async function connect() {
+            try {
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'Nexus Power' }, { services: [SVC_UUID] }],
+                    optionalServices: [SVC_UUID]
+                });
+                device.addEventListener('gattserverdisconnected', onDisconnected);
+                server   = await device.gatt.connect();
+                service  = await server.getPrimaryService(SVC_UUID);
+                charData = await service.getCharacteristic(CHR_DATA);
+                charCtrl = await service.getCharacteristic(CHR_CTRL);
+                updateUIStatus(true);
+                await charData.startNotifications();
+                charData.addEventListener('characteristicvaluechanged', handleData);
+            } catch (err) { console.error(err); }
+        }
+
+        function onDisconnected() { updateUIStatus(false); }
+
+        function updateUIStatus(connected) {
+            document.getElementById('status-text').innerText = connected ? 'CONNECTED' : 'OFFLINE';
+            document.getElementById('dot').className = connected ? 'status-dot online' : 'status-dot';
+            document.getElementById('btnPower').disabled = !connected;
+            document.getElementById('btnConnect').style.display = connected ? 'none' : 'block';
+            if (!connected) {
+                document.getElementById('dev-serial').innerText = 'SN: --------';
+                document.getElementById('dev-status').innerText = 'NOT INITIALIZED';
+                document.getElementById('dev-status').style.background = 'transparent';
+                document.getElementById('volts').innerText = '-- V';
+                document.getElementById('amps').innerText  = '-- A';
+                document.getElementById('watts').innerText = '-- W';
+                document.getElementById('pct').innerHTML   = '--<span class="pct-unit">%</span>';
+                document.getElementById('charging-badge').classList.remove('visible');
+            }
+        }
+
+        function handleData(event) {
+            const view = event.target.value;
+            const v   = view.getFloat32(0, true).toFixed(2);
+            const i   = (view.getFloat32(4, true) / 1000).toFixed(2);
+            const p   = (view.getFloat32(8, true) / 1000).toFixed(2);
+            const pct = view.getUint8(12);
+
+            const m1  = view.getUint8(13);
+            const m2  = view.getUint8(14);
+            const m3  = view.getUint8(15);
+            const sig = view.getUint8(16);
+            const SECRET = parseInt(PROJECT_KEY, 16);
+
+            const isValid = ((m1 + m2 + m3) & 0xFF) ^ SECRET;
+
+            if (sig === isValid) {
+                const snRaw = `NX-${m1.toString(16).padStart(2,'0')}${m2.toString(16).padStart(2,'0')}${m3.toString(16).padStart(2,'0')}`.toUpperCase();
+                document.getElementById('dev-serial').innerText = `SN: ${snRaw}`;
+
+                if (authorizedSerials.includes(snRaw)) {
+                    document.getElementById('dev-status').innerText = 'REGISTERED ASSET';
+                    document.getElementById('dev-status').style.background = 'rgba(0,255,136,0.1)';
+                    document.getElementById('dev-status').style.color = 'var(--accent)';
+
+                    const hwPowerOn = view.getUint8(17) === 1;
+                    if (isPowerOn !== hwPowerOn) { isPowerOn = hwPowerOn; updatePowerButtonUI(); }
+
+                    const status = view.getUint8(18);
+                    document.getElementById('alert-banner').style.display = status === 1 ? 'block' : 'none';
+
+                    const isCharging = view.byteLength > 19 && view.getUint8(19) === 1;
+                    document.getElementById('charging-badge').classList.toggle('visible', isCharging);
+                } else {
+                    charCtrl.writeValue(new Uint8Array([0])).then(() => {
+                        device.gatt.disconnect();
+                        alert('ACCESS DENIED: Hardware not registered. Power output disabled.');
+                    });
+                }
+            } else {
+                charCtrl.writeValue(new Uint8Array([0])).then(() => {
+                    device.gatt.disconnect();
+                    alert('SECURITY ALERT: Counterfeit hardware detected. Device locked.');
+                });
+            }
+
+            document.getElementById('volts').innerText = v + ' V';
+            document.getElementById('amps').innerText  = i + ' A';
+            document.getElementById('watts').innerText = p + ' W';
+            document.getElementById('pct').innerHTML   = pct + '<span class="pct-unit">%</span>';
+
+            const pctEl = document.getElementById('pct');
+            if (pct < 20)      pctEl.style.color = 'var(--danger)';
+            else if (pct < 50) pctEl.style.color = '#f59e0b';
+            else               pctEl.style.color = 'var(--text)';
+        }
+
+        function updatePowerButtonUI() {
+            const btn = document.getElementById('btnPower');
+            btn.innerText = isPowerOn ? 'POWER ON' : 'POWER OFF';
+            btn.classList.toggle('off', !isPowerOn);
+            btn.style.boxShadow = isPowerOn ? '0 0 20px rgba(0,255,136,0.2)' : 'none';
+        }
+
+        async function togglePower() {
+            const targetState = !isPowerOn;
+            try {
+                await charCtrl.writeValue(new Uint8Array([targetState ? 1 : 0]));
+                isPowerOn = targetState;
+                updatePowerButtonUI();
+            } catch (e) { console.error('Failed to toggle power', e); }
+        }
+
+        document.getElementById('btnConnect').onclick = connect;
+        document.getElementById('btnPower').onclick   = togglePower;
+
+        // ── Service Worker ────────────────────────────────────────────
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
+            });
+        }
+
+        // ── Android Install Prompt ────────────────────────────────────
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!sessionStorage.getItem('pwa-dismissed'))
+                document.getElementById('install-banner').classList.remove('hidden');
+        });
+        document.getElementById('btn-install').addEventListener('click', async () => {
+            document.getElementById('install-banner').classList.add('hidden');
+            if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; }
+        });
+        document.getElementById('btn-dismiss').addEventListener('click', () => {
+            document.getElementById('install-banner').classList.add('hidden');
+            sessionStorage.setItem('pwa-dismissed', '1');
+        });
+
+        // ── iOS Bluefy Hint ───────────────────────────────────────────
+        const isIos        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const isStandalone = ('standalone' in navigator) && navigator.standalone;
+        if (isIos && !isStandalone && !sessionStorage.getItem('ios-hint-dismissed'))
+            setTimeout(() => document.getElementById('ios-hint').classList.remove('hidden'), 2000);
+
+    </script>
+</body>
+</html>
